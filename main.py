@@ -65,6 +65,7 @@ async def del_chat(_, message: Message):
             await message.reply_text("❌ Pair not found.")
     except ValueError:
         await message.reply_text("❌ Usage: /delchat <source> <destination>")
+
 @client.on_message(filters.command("list") & filters.private)
 async def list_chats(_, message: Message):
     if not is_admin(message.from_user.id):
@@ -97,7 +98,7 @@ async def forward_media(_, message: Message):
         except Exception as e:
             print(f"Failed to forward to {pair['destination']}: {e}")
 
-# FastAPI health check endpoint with HEAD support
+# FastAPI health check route (GET and HEAD)
 @app.route("/", methods=["GET", "HEAD"])
 async def health_check(request: Request):
     return JSONResponse({"status": "healthy"})
@@ -114,12 +115,12 @@ async def start_bot():
     print("Bot started!")
     await send_restart_message()
 
-    # Create two asyncio tasks
-    forever_event = asyncio.Event()
-    bot_task = asyncio.create_task(forever_event.wait())  # Keeps bot running
-
-    config = uvicorn.Config(app=app, host="0.0.0.0", port=8080, log_level="info", loop="asyncio")
+    # Start FastAPI server using uvicorn
+    config = uvicorn.Config(app=app, host="0.0.0.0", port=8080, log_level="info")
     server = uvicorn.Server(config)
-    api_task = asyncio.create_task(server.serve())
+    await server.serve()
 
-    await asyncio.gather(bot_task, api_task)
+if __name__ == "__main__":
+    import asyncio
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start_bot())
