@@ -5,9 +5,9 @@ import asyncio
 import os
 
 API_ID = int(os.getenv("API_ID", 123456))
-API_HASH = os.getenv("API_HASH", "your_api_hash")
-BOT_TOKEN = os.getenv("BOT_TOKEN", "your_bot_token")
-MONGO_URI = os.getenv("MONGO_URI", "your_mongodb_uri")
+API_HASH = os.getenv("API_HASH", "")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+MONGO_URI = os.getenv("MONGO_URI", "")
 ADMINS = list(map(int, os.getenv("ADMINS", "123456789").split()))
 
 client = Client("forward_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
