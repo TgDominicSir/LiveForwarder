@@ -65,6 +65,21 @@ async def del_chat(_, message: Message):
             await message.reply_text("❌ Pair not found.")
     except ValueError:
         await message.reply_text("❌ Usage: /delchat <source> <destination>")
+@client.on_message(filters.command("list") & filters.private)
+async def list_chats(_, message: Message):
+    if not is_admin(message.from_user.id):
+        return
+
+    pairs = list(collection.find())
+    if not pairs:
+        await message.reply_text("⚠️ No chat pairs found.")
+        return
+
+    text = "**📋 Chat Pairs:**\n\n"
+    for i, pair in enumerate(pairs, start=1):
+        text += f"{i}. Source: `{pair['source']}` → Destination: `{pair['destination']}`\n"
+
+    await message.reply_text(text)
 
 @client.on_message(filters.channel)
 async def forward_media(_, message: Message):
