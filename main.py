@@ -99,11 +99,17 @@ async def start_bot():
     print("Bot started!")
     await send_restart_message()
 
-    # Run FastAPI server for health check
-    config = uvicorn.Config(app=app, host="0.0.0.0", port=8080, log_level="info")
+    # Create two asyncio tasks:
+    # 1) Pyrogram idle() to keep bot running and handling messages
+    # 2) Uvicorn server for FastAPI health checks
+    bot_task = asyncio.create_task(client.idle())
+
+    config = uvicorn.Config(app=app, host="0.0.0.0", port=8080, log_level="info", loop="asyncio")
     server = uvicorn.Server(config)
-    await server.serve()
+    api_task = asyncio.create_task(server.serve())
+
+    # Wait for either task to finish (usually client.idle() runs until stopped)
+    await asyncio.gather(bot_task, api_task)
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(start_bot())
