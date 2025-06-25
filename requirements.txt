@@ -1,3 +1,5 @@
 pyrofork==2.3.44
 tgcrypto
 pymongo
+fastapi
+uvicorn
