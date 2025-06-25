@@ -1,4 +1,4 @@
-# Pyrogram Forward Bot
+# Live Forward Bot
 
 ## Description
 This is a Pyrogram-based Telegram bot that forwards media (videos, documents, photos, audio) from source channels to destination channels. Admins can manage channel pairs using simple commands.
