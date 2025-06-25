@@ -3,6 +3,9 @@ from pyrogram.types import Message
 from pymongo import MongoClient
 import asyncio
 import os
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+import uvicorn
 
 API_ID = int(os.getenv("API_ID", 123456))
 API_HASH = os.getenv("API_HASH", "")
@@ -14,6 +17,8 @@ client = Client("forward_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_T
 mongo = MongoClient(MONGO_URI)
 db = mongo["forwardbot"]
 collection = db["chats"]
+
+app = FastAPI()
 
 def is_admin(user_id):
     return user_id in ADMINS
@@ -77,4 +82,28 @@ async def forward_media(_, message: Message):
         except Exception as e:
             print(f"Failed to forward to {pair['destination']}: {e}")
 
-client.run()
+# FastAPI health check endpoint with HEAD support
+@app.route("/", methods=["GET", "HEAD"])
+async def health_check(request: Request):
+    return JSONResponse({"status": "healthy"})
+
+async def send_restart_message():
+    for admin_id in ADMINS:
+        try:
+            await client.send_message(admin_id, "✅ Bot restarted and is now running.")
+        except Exception:
+            pass
+
+async def start_bot():
+    await client.start()
+    print("Bot started!")
+    await send_restart_message()
+
+    # Run FastAPI server for health check
+    config = uvicorn.Config(app=app, host="0.0.0.0", port=8080, log_level="info")
+    server = uvicorn.Server(config)
+    await server.serve()
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(start_bot())
